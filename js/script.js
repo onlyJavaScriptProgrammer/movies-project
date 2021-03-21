@@ -1,17 +1,3 @@
-/* Задания на урок:
-
-1) Удалить все рекламные блоки со страницы (правая часть сайта)
-
-2) Изменить жанр фильма, поменять "комедия" на "драма"
-
-3) Изменить задний фон постера с фильмом на изображение "bg.jpg". Оно лежит в папке img.
-Реализовать только при помощи JS
-
-4) Список фильмов на странице сформировать на основании данных из этого JS файла.
-Отсортировать их по алфавиту 
-
-5) Добавить нумерацию выведенных фильмов */
-
 'use strict';
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -21,33 +7,87 @@ window.addEventListener('DOMContentLoaded', () => {
             "Лига справедливости",
             "Ла-ла лэнд",
             "Одержимость",
-            "Скотт Пилигрим против..."
+            "Скотт Пилигрим против..." 
         ]
     };
 
     const adv = document.querySelectorAll('.promo__adv img'),
           genre = document.querySelector('.promo__genre'),
           bg = document.querySelector('.promo__bg'),
-          ul = document.querySelector('.promo__interactive-list');
+          ul = document.querySelector('.promo__interactive-list'),
+          addFilm = document.querySelector('.adding__input'),
+          addForm = document.querySelector('.add'),
+          checkBox = document.querySelector('[type="checkbox"]');
+    
+    addForm.addEventListener('submit', function(event) {
+        event.preventDefault();
 
-    adv.forEach(item => {
-        item.remove();
+        let newFilm = addFilm.value;
+        
+        if(newFilm){
+
+            if(newFilm.length > 21){
+                newFilm = `${newFilm.substring(0, 22)}...`;
+            }
+
+            movieDB.movies.push(newFilm);
+            sortArr(movieDB.movies);
+            
+            createMovieList(movieDB.movies, ul);
+        }
+
+        
+        event.target.reset();
     });
+    
+    const deleteAdv = (arg) => {
+        arg.forEach(item => {
+            item.remove();
+        });
+    };
 
-    genre.textContent = 'драма';
+    const makeChanges = () => {
+        genre.textContent = 'драма';
+        bg.style.backgroundImage = 'url("img/bg.jpg")';
+    };
 
-    bg.style.backgroundImage = 'url("img/bg.jpg")';
+    const sortArr = (arr) => {
+        arr.sort();
+    };
 
-    ul.innerHTML = '';
+    function createMovieList(films, parent) {
 
-    movieDB.movies.sort();
+        let favorite = checkBox.checked;
 
-    movieDB.movies.forEach((item, index) => {
-        ul.innerHTML += `
-        <li class="promo__interactive-item">${index + 1}.${item} 
-            <div class="delete"></div>
-        </li>`;
-    });
+        parent.innerHTML = '';
+        sortArr(films);
 
+        films.forEach((item, index) => {
+            parent.innerHTML += `
+            <li class="promo__interactive-item">${index + 1} ${item} 
+                <div class="delete"></div>
+            </li>`;
+        });
+
+        document.querySelectorAll('.delete').forEach((item, index) => {
+            item.addEventListener('click', () => {
+                item.parentElement.remove();
+                movieDB.movies.splice(index, 1);
+
+                createMovieList(films, parent);
+            });
+        });
+
+        if(favorite) {
+            console.log('Добавляем любимый фильм');
+        }
+
+    }
+
+
+    deleteAdv(adv);
+    makeChanges();
+    createMovieList(movieDB.movies, ul);
+    
 });
 
